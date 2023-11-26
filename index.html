@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.5">
+        <title>Overrepresented Given Names</title>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <svg id="map"></svg>
+        <div id="ui">
+            <div id="sex">
+                Sex
+                <div><label><input type="checkbox" name="sex" value="Male"> Male</label></div>
+                <div><label><input type="checkbox" name="sex" value="Female"> Female</label></div>
+            </div>
+            <div id="birthYear">
+                Birth Year
+                <input type="number" id="minBirthYear" min="1910" max="2022" step="1" value="1910">
+                 to 
+                <input type="number" id="maxBirthYear" min="1910" max="2022" step="1" value="2022">
+            </div>
+            <div id="race">
+                Race
+                <div><label><input type="checkbox" name="race" value="White"> White</label></div>
+                <div><label><input type="checkbox" name="race" value="Hispanic"> Hispanic</label></div>
+                <div><label><input type="checkbox" name="race" value="Black"> Black</label></div>
+                <div><label><input type="checkbox" name="race" value="Asian"> Asian</label></div>
+                <div><label><input type="checkbox" name="race" value="Mixed Race"> Mixed Race</label></div>
+                <div><label><input type="checkbox" name="race" value="Indigenous"> Indigenous</label></div>
+                <button onclick="selectAllRaces()">Select All</button>
+                <button onclick="deselectAllRaces()">Deselect All</button>
+            </div>
+            <div id="motherAge">
+                Mother's Age
+                <select id="minMotherAge" onchange="updateMaxMotherAgeOptions()">
+                    <option value="under21" selected>Under 21</option>
+                    <script>for (var i = 21; i <= 38; i++) document.write('<option value="' + i + '">' + i + '</option>');</script>
+                    <option value="over38">Over 38</option>
+                </select>
+                 to 
+                <select id="maxMotherAge" onchange="updateMinMotherAgeOptions()">
+                    <option value="under21">Under 21</option>
+                    <script>for (var i = 21; i <= 38; i++) document.write('<option value="' + i + '">' + i + '</option>');</script>
+                    <option value="over38" selected>Over 38</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit">Submit</button>
+        <script src="ui.js"></script>
+    </body>
+</html>
