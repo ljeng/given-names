@@ -11,8 +11,8 @@
         <div id="ui">
             <div id="sex">
                 Sex
-                <div><label><input type="checkbox" name="sex" value="Male"> Male</label></div>
-                <div><label><input type="checkbox" name="sex" value="Female"> Female</label></div>
+                <label><input type="checkbox" name="sex" value="Male" id="maleCheckbox"/> Male</label>
+                <label><input type="checkbox" name="sex" value="Female" id="femaleCheckbox"/> Female</label>
             </div>
             <div id="birthYear">
                 Birth Year
@@ -46,7 +46,8 @@
                 </select>
             </div>
         </div>
-        <button type="submit">Submit</button>
-        <script src="ui.js"></script>
+        <button type="submit" onclick="submit()">Submit</button>
+        <div id="data"></div>
+        <script src="script.js"></script>
     </body>
 </html>
