@@ -53,19 +53,18 @@ const state_abbreviation = {
 }
 let state = null;
 
-d3.json(geojson_url).then(function (geojson) {
-    let fill = "white";
-    let clickedFill = "#002147";
-    let hoverFill = "#BB133E";
-    let stroke = "black";
-    let mouseOverDuration = 200;
-    let mouseOutDuration = 500;
-    let clickDuration = 200;
-    let opacity = 0.9;
-    let x = 0;
-    let y = 0;
-    let tooltip = d3
-        .select("body")
+d3.json(geojson_us).then(function (geojson) {
+    const fill = "white";
+    const clickedFill = "#002147";
+    const hoverFill = "#BB133E";
+    const stroke = "black";
+    const mouseOverDuration = 200;
+    const mouseOutDuration = 500;
+    const clickDuration = 200;
+    const opacity = 0.9;
+    const x = 0;
+    const y = 0;
+    const tooltip = d3.select("body")
         .append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
@@ -92,7 +91,7 @@ d3.json(geojson_url).then(function (geojson) {
     }
 
     function click(d, i) {
-        d3.selectAll("#map path")
+        d3.selectAll("#mapUs path")
             .classed("clicked", false)
             .transition()
             .duration(clickDuration)
@@ -110,10 +109,8 @@ d3.json(geojson_url).then(function (geojson) {
         .enter().append("path")
         .attr("d",
             d3.geoPath()
-                .projection(d3
-                    .geoAlbersUsa()
-                    .fitSize([window.innerWidth, window.innerHeight],
-                        geojson)))
+                .projection(d3.geoAlbersUsa()
+                    .fitSize([window.innerWidth, window.innerHeight], geojson)))
         .style("fill", fill)
         .style("stroke", stroke)
         .on("mouseover", mouseOver)
@@ -125,7 +122,7 @@ function submit() {
     const rangeBirthYear = 123;
     const k = 100;
 
-    const file_selection = {};
+    let file_selection = {};
     const maleChecked = document.getElementById("maleCheckbox").checked;
     const femaleChecked = document.getElementById("femaleCheckbox").checked;
     let selection_sex = [];
@@ -187,13 +184,13 @@ function submit() {
                     }
             }
             else {
-                let x = selection[0];
+                const x = selection[0];
                 for (let name of Object.keys(normalizedMap[file][x]))
                     memo[file][name] = normalizedMap[file][x][name];
             }
         });
 
-        const name_multiplier = {};
+        let name_multiplier = {};
         for (let file of Object.keys(memo)) {
             for (let name of Object.keys(memo[file])) {
                 if (!name_multiplier.hasOwnProperty(name))
@@ -202,17 +199,17 @@ function submit() {
             }
         }
 
-        const names_element = document.getElementById("names");
+        let names_element = document.getElementById("names");
         names_element.innerHTML = "";
         let ul = document.createElement("ul");
         Object.entries(name_multiplier)
             .sort((a, b) => b[1] - a[1])
             .slice(0, k)
-            .map(([name, multiplier]) => [name, multiplier]).forEach(function ([name, multiplier]) {
-            let li = document.createElement("li");
-            li.appendChild(document.createTextNode(`${name}: ${multiplier.toFixed(2)}`));
-            ul.appendChild(li);
-        });
+            .map(([name, multiplier]) => [name, multiplier]) .forEach(function ([name, multiplier]) {
+                let li = document.createElement("li");
+                li.appendChild(document.createTextNode(`${name}: ${multiplier.toFixed(2)}`));
+                ul.appendChild(li);
+            });
         names_element.appendChild(ul);
     });
 }
@@ -228,8 +225,8 @@ function deselectAllRaces() {
 }
 
 function updateMinMotherAgeOptions() {
-    let minMotherAge = document.getElementById('minMotherAge');
-    let maxMotherAge = document.getElementById('maxMotherAge').value;
+    const minMotherAge = document.getElementById('minMotherAge');
+    const maxMotherAge = document.getElementById('maxMotherAge').value;
 
     minMotherAge.querySelectorAll('option').forEach(function(option) {
         option.disabled = false;
@@ -238,7 +235,7 @@ function updateMinMotherAgeOptions() {
     if (maxMotherAge != 'over38') {
         minMotherAge.querySelector('[value="over38"]').disabled = true;
         if (maxMotherAge != 'under21') {
-            let maxMotherAgeValue = parseInt(maxMotherAge);
+            const maxMotherAgeValue = parseInt(maxMotherAge);
             for (let i = 21; i <= 38; i++)
                 minMotherAge.querySelector('[value="' + i + '"]').disabled = (i > maxMotherAgeValue);
         }
@@ -249,8 +246,8 @@ function updateMinMotherAgeOptions() {
 }
 
 function updateMaxMotherAgeOptions() {
-    let minMotherAge = document.getElementById('minMotherAge').value;
-    let maxMotherAge = document.getElementById('maxMotherAge');
+    const minMotherAge = document.getElementById('minMotherAge').value;
+    const maxMotherAge = document.getElementById('maxMotherAge');
 
     maxMotherAge.querySelectorAll('option').forEach(function(option) {
         option.disabled = false;
@@ -259,7 +256,7 @@ function updateMaxMotherAgeOptions() {
     if (minMotherAge != 'under21') {
         maxMotherAge.querySelector('[value="under21"]').disabled = true;
         if (minMotherAge != 'over38') {
-            let minMotherAgeValue = parseInt(minMotherAge);
+            const minMotherAgeValue = parseInt(minMotherAge);
             for (let i = 21; i <= 38; i++)
                 maxMotherAge.querySelector('[value="' + i + '"]').disabled = (i < minMotherAgeValue);
         }
