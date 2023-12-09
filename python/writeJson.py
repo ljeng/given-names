@@ -21,7 +21,7 @@ def jsonify(folders):
     sex_sum = defaultdict(int)
     birth_year_sum = defaultdict(int)
     for folder in folders:
-        path = os.path.join('..', folder)
+        path = os.path.join('..', 'data', folder)
         for filename in os.listdir(path):
             if filename.endswith('.TXT'):
                 for line in open(os.path.join(path, filename), 'r'):
@@ -42,7 +42,8 @@ def jsonify(folders):
     sum_occurrences = sum(name_sum.values())
     dump({name: occurrences / sum_occurrences for name, occurrences in name_sum.items()},
         'sum',
-        'name')
+        'divisor')
+    dump(name_sum, 'sum', 'name')
     for obj, filename in [
         (geo_sum, 'geo'),
         (sex_sum, 'sex'),
@@ -51,7 +52,7 @@ def jsonify(folders):
 
 def normalize(filename):
     input_dict = load('count', filename)
-    divisor_dict = load('sum', 'name')
+    divisor_dict = load('sum', 'divisor')
     sum_values = sum(divisor_dict.values())
     output_dict = defaultdict(lambda: defaultdict(float))
     for superkey, supervalue in input_dict.items():
@@ -99,9 +100,9 @@ def normalizeRace():
             output_dict[superkey][subkey] = subvalue / sum_supervalues / divisor_dict[subkey]
     dump(output_dict, 'normalized', filename)
 
+
 jsonify(['namesbystate', 'namesbyterritory'])
-jsonifyRace('../firstnames.Data.csv')
-filenames = ['geo', 'sex', 'birth_year']
-for filename in filenames:
+jsonifyRace('../data/firstnames.Data.csv')
+for filename in ['geo', 'sex', 'birth_year']:
     normalize(filename)
 normalizeRace()

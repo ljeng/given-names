@@ -53,7 +53,7 @@ const state_abbreviation = {
 }
 let state = null;
 
-d3.json(geojson_us).then(function (geojson) {
+d3.json(geojson_url).then(function (geojson) {
     const fill = "white";
     const clickedFill = "#002147";
     const hoverFill = "#BB133E";
@@ -91,7 +91,7 @@ d3.json(geojson_us).then(function (geojson) {
     }
 
     function click(d, i) {
-        d3.selectAll("#mapUs path")
+        d3.selectAll("#map path")
             .classed("clicked", false)
             .transition()
             .duration(clickDuration)
@@ -119,8 +119,14 @@ d3.json(geojson_us).then(function (geojson) {
 });
 
 function submit() {
+    d3.select("#treeMap").selectAll("*").remove();
+
     const rangeBirthYear = 123;
     const k = 100;
+    const tolerance = 0.01;
+    const width = 1568;
+    const height = 980;
+    const l = 70;
 
     let file_selection = {};
     const maleChecked = document.getElementById("maleCheckbox").checked;
@@ -157,17 +163,20 @@ function submit() {
         promises.push(d3.json("json/sum/" + file + ".json"));
         promises.push(d3.json("json/normalized/" + file + ".json"));
     }
+    promises.push(d3.json("json/sum/name.json"));
 
-    Promise.all(promises).then((_) => {
+    Promise.all(promises).then((data) => {
         let sumMap = {};
         let normalizedMap = {};
+        let nameMap = {};
 
         Object.keys(file_selection).forEach((file, i) => {
             i *= 2;
-            sumMap[file] = _[i++];
-            normalizedMap[file] = _[i++];
+            sumMap[file] = data[i++];
+            normalizedMap[file] = data[i++];
         });
 
+        nameMap = data[data.length - 1];
         let memo = {};
 
         Object.entries(file_selection).forEach(([file, selection]) => {
@@ -190,28 +199,72 @@ function submit() {
             }
         });
 
-        let name_multiplier = {};
+        let nameMultiplier = {};
         for (let file of Object.keys(memo)) {
             for (let name of Object.keys(memo[file])) {
-                if (!name_multiplier.hasOwnProperty(name))
-                    name_multiplier[name] = 1;
-                name_multiplier[name] *= memo[file][name];
+                if (!nameMultiplier.hasOwnProperty(name))
+                    nameMultiplier[name] = 1;
+                nameMultiplier[name] *= memo[file][name];
             }
         }
 
-        let names_element = document.getElementById("names");
-        names_element.innerHTML = "";
-        let ul = document.createElement("ul");
-        Object.entries(name_multiplier)
-            .sort((a, b) => b[1] - a[1])
+        const nodes = Object.entries(nameMultiplier)
+            .sort((a, b) => {
+                const multiplierComparison = b[1] - a[1];
+                return Math.abs(multiplierComparison) > tolerance
+                    ? multiplierComparison
+                    : nameMap[b[0]] - nameMap[a[0]];
+            })
             .slice(0, k)
-            .map(([name, multiplier]) => [name, multiplier]) .forEach(function ([name, multiplier]) {
-                let li = document.createElement("li");
-                li.appendChild(document.createTextNode(`${name}: ${multiplier.toFixed(2)}`));
-                ul.appendChild(li);
-            });
-        names_element.appendChild(ul);
-    });
+            .map(entry => ({name: entry[0],
+                ratio: entry[1],
+                count: nameMap[entry[0]]}))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        console.log(nodes);
+
+        const treemap = d3.treemap().size([width, height]);
+        const root = d3.hierarchy({ children: nodes }).sum(d => d.count);
+        treemap(root);
+        const svg = d3.select("#treeMap")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+        const gradient = d3.scaleSequential()
+            .domain([d3.max(nodes, d => d.ratio), d3.min(nodes, d => d.ratio)])
+            .interpolator(d3.interpolateViridis);
+        const maxCount = d3.max(nodes, d => d.count);
+        const minCount = d3.min(nodes, d => d.count);
+        const countScale = d3.scaleLinear()
+            .domain([minCount, maxCount])
+            .range([Math.sqrt(minCount), Math.sqrt(maxCount)]);
+        svg.selectAll(".cell")
+            .data(root.leaves())
+            .enter().append("rect")
+            .attr("class", "cell")
+            .attr("x", d => d.x0)
+            .attr("y", d => d.y0)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1)
+            .attr("width", d => countScale(d.data.count) * (d.x1 - d.x0))
+            .attr("height", d => countScale(d.data.count) * (d.y1 - d.y0))
+            .attr("fill", d => gradient(d.data.ratio));
+        svg.selectAll(".label")
+            .data(root.leaves())
+            .enter().append("text")
+            .attr("class", "label")
+            .attr("x", d => (d.x0 + d.x1) / 2)
+            .attr("y", d => (d.y0 + d.y1) / 2)
+            .attr("text-anchor", "middle")
+            .attr("fill",
+                d => d3.lab(gradient(d.data.ratio)).l < l
+                ? "white"
+                : "black")
+            .attr("transform",
+                d => (d.y1 - d.y0 > d.x1 - d.x0)
+                ? `rotate(90, ${(d.x0 + d.x1) / 2}, ${(d.y0 + d.y1) / 2})`
+                : "")
+            .text(d => d.data.name);
+    })
 }
 
 function selectAllRaces() {
