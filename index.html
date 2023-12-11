@@ -2,11 +2,12 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.5">
-        <title>Overrepresented Given Names</title>
+        <title>Given Names</title>
         <script src="https://d3js.org/d3.v5.min.js"></script>
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
+        <h1>Frequency Ratios of Given Names in Target Population to Total Population</h1>
         <svg id="map"></svg>
         <div id="ui">
             <div id="sex">
@@ -49,6 +50,8 @@
             --->
         </div>
         <button type="submit" onclick="submit()">Submit</button>
+        <div id="legend"></div>
+        <div id="caption"></div>
         <div id="treeMap"></div>
         <script src="script.js"></script>
     </body>
